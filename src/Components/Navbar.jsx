@@ -1,6 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../utils/userSlice";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const fallbackPhoto = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
 
@@ -9,9 +12,13 @@ const Navbar = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
 
-  const handleLogout = () => {
-    dispatch(removeUser());
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await axios.post(BASE_URL + "/api/auth/logout", {}, { withCredentials: true });
+    } finally {
+      dispatch(removeUser());
+      navigate("/login");
+    }
   };
 
   return (

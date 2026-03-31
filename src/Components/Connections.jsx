@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -53,6 +54,7 @@ const MyConnections = () => {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -74,6 +76,12 @@ const MyConnections = () => {
           <div className="card-body p-4 flex flex-row items-center gap-4">
             <Avatar user={conn} />
             <UserInfo user={conn} />
+            <button
+              className="btn btn-primary btn-sm shrink-0"
+              onClick={() => navigate(`/chat/${conn._id}`)}
+            >
+              Message
+            </button>
           </div>
         </div>
       ))}
