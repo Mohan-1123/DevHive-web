@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import socket from "../utils/socketService";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const fallbackPhoto = "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp";
@@ -17,10 +18,13 @@ const Chat = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
+  // Fetch user info + message history, then set up socket
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,14 +46,60 @@ const Chat = () => {
         setLoading(false);
       }
     };
+
     fetchData();
+
+    // Connect socket and join room
+    socket.connect();
+
+    socket.on("connect", () => {
+      socket.emit("joinRoom", { targetUserId: userId });
+      socket.emit("markSeen", { senderId: userId });
+    });
+
+    // Receive real-time messages
+    socket.on("receiveMessage", (msg) => {
+      setMessages((prev) => {
+        // Replace matching optimistic message (same text, sent by me)
+        const optIdx = prev.findIndex(
+          (m) => m._optimistic && m.text === msg.text && m.senderId === me?._id
+        );
+        if (optIdx !== -1) {
+          const updated = [...prev];
+          updated[optIdx] = msg;
+          return updated;
+        }
+        return [...prev, msg];
+      });
+    });
+
+    // Show typing indicator from other user
+    socket.on("userTyping", ({ userId: typingUserId, isTyping: typing }) => {
+      if (typingUserId === userId) setIsTyping(typing);
+    });
+
+    // When other user sees our messages
+    socket.on("messagesSeen", () => {
+      setMessages((prev) =>
+        prev.map((m) => (m.senderId === me?._id ? { ...m, seen: true } : m))
+      );
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("receiveMessage");
+      socket.off("userTyping");
+      socket.off("messagesSeen");
+      socket.disconnect();
+      clearTimeout(typingTimeoutRef.current);
+    };
   }, [userId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  const handleSend = async (e) => {
+  const handleSend = (e) => {
     e.preventDefault();
     if (!text.trim() || sending) return;
 
@@ -65,18 +115,18 @@ const Chat = () => {
     inputRef.current?.focus();
     setSending(true);
 
-    try {
-      await axios.post(
-        BASE_URL + `/api/chat/${userId}`,
-        { text: newMsg.text },
-        { withCredentials: true }
-      );
-    } catch {
-      setMessages((prev) => prev.filter((m) => m !== newMsg));
-      setText(newMsg.text);
-    } finally {
+    socket.emit("sendMessage", { receiverId: userId, text: newMsg.text }, (ack) => {
+      // If server returns an error via ack callback
+      if (ack?.error) {
+        setMessages((prev) => prev.filter((m) => m !== newMsg));
+        setText(newMsg.text);
+      }
       setSending(false);
-    }
+    });
+
+    // Stop typing indicator
+    socket.emit("typing", { receiverId: userId, isTyping: false });
+    clearTimeout(typingTimeoutRef.current);
   };
 
   const handleKeyDown = (e) => {
@@ -84,6 +134,19 @@ const Chat = () => {
       e.preventDefault();
       handleSend(e);
     }
+  };
+
+  const handleInputChange = (e) => {
+    setText(e.target.value);
+
+    // Emit typing start
+    socket.emit("typing", { receiverId: userId, isTyping: true });
+
+    // Auto-stop typing after 2 seconds of no input
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("typing", { receiverId: userId, isTyping: false });
+    }, 2000);
   };
 
   const formatTime = (iso) => {
@@ -162,7 +225,7 @@ const Chat = () => {
               </p>
               <p className="text-xs text-success flex items-center gap-1">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
-                Online
+                {isTyping ? "typing..." : "Online"}
               </p>
             </div>
           </div>
@@ -201,7 +264,7 @@ const Chat = () => {
           }
 
           const msg = item;
-          const isMe = msg.senderId === me?._id;
+          const isMe = msg.senderId === me?._id || msg.senderId?._id === me?._id;
           const nextItem = messagesWithDates[i + 1];
           const isLast = !nextItem || nextItem.type === "date" || (
             nextItem.type === "msg" && nextItem.senderId !== msg.senderId
@@ -241,13 +304,40 @@ const Chat = () => {
                 {isLast && msg.createdAt && (
                   <span className="text-xs text-base-content/40 mt-1 px-1">
                     {formatTime(msg.createdAt)}
-                    {isMe && <span className="ml-1 text-primary/60">✓✓</span>}
+                    {isMe && (
+                      <span className={`ml-1 ${msg.seen ? "text-primary" : "text-base-content/40"}`}>
+                        ✓✓
+                      </span>
+                    )}
                   </span>
                 )}
               </div>
             </div>
           );
         })}
+
+        {/* Typing indicator bubble */}
+        {isTyping && (
+          <div className="flex items-end gap-2 flex-row mb-3">
+            <div className="w-7 shrink-0">
+              <div className="avatar">
+                <div className="w-7 rounded-full">
+                  <img
+                    src={chatUser?.photoUrl || fallbackPhoto}
+                    alt="avatar"
+                    onError={(e) => { e.target.src = fallbackPhoto; }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="px-4 py-2 rounded-2xl rounded-bl-sm bg-base-300 text-base-content text-sm flex gap-1 items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-base-content/50 animate-bounce [animation-delay:0ms]"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-base-content/50 animate-bounce [animation-delay:150ms]"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-base-content/50 animate-bounce [animation-delay:300ms]"></span>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -260,7 +350,7 @@ const Chat = () => {
             className="flex-1 bg-transparent outline-none text-sm placeholder:text-base-content/40"
             placeholder="Type a message..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             disabled={sending}
             autoComplete="off"
