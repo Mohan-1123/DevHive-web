@@ -303,8 +303,8 @@ const Chat = () => {
                   className={`
                     px-4 py-2.5 text-sm leading-relaxed wrap-break-word
                     ${isMe
-                      ? "bg-primary text-primary-content rounded-t-2xl rounded-bl-2xl rounded-br-md"
-                      : "bg-base-100 text-base-content rounded-t-2xl rounded-br-2xl rounded-bl-md shadow-sm"
+                      ? "bg-primary text-primary-content rounded-t-2xl rounded-bl-2xl rounded-br-sm"
+                      : "bg-white text-gray-800 border border-gray-200 rounded-t-2xl rounded-br-2xl rounded-bl-sm shadow-sm"
                     }
                     ${msg._optimistic ? "opacity-60" : ""}
                   `}
