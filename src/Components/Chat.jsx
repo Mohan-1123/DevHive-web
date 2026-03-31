@@ -194,14 +194,14 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-base-200">
+    <div className="flex flex-col h-[calc(100vh-64px)]" style={{ background: "var(--color-base-200)" }}>
 
       {/* ── Header ── */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-base-300 border-b border-base-content/10 shadow-sm shrink-0 z-10">
+      <div className="shrink-0 flex items-center gap-3 px-4 py-3 shadow-md z-10"
+        style={{ background: "var(--color-base-300)", borderBottom: "1px solid oklch(var(--bc)/0.08)" }}>
         <button
           className="btn btn-ghost btn-sm btn-circle"
           onClick={() => navigate("/connections")}
-          title="Back"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -209,9 +209,9 @@ const Chat = () => {
         </button>
 
         {chatUser && (
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          <>
             <div className="avatar">
-              <div className="w-10 rounded-full ring-2 ring-primary/30">
+              <div className="w-10 h-10 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-base-300">
                 <img
                   src={chatUser.photoUrl || fallbackPhoto}
                   alt={chatUser.firstName}
@@ -219,25 +219,27 @@ const Chat = () => {
                 />
               </div>
             </div>
-            <div className="min-w-0">
-              <p className="font-semibold text-sm leading-tight truncate">
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-base leading-tight truncate">
                 {chatUser.firstName} {chatUser.lastName}
               </p>
-              <p className="text-xs text-success flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
+              <p className={`text-xs flex items-center gap-1 transition-all ${isTyping ? "text-primary" : "text-success"}`}>
+                <span className={`inline-block w-2 h-2 rounded-full ${isTyping ? "bg-primary animate-pulse" : "bg-success"}`}></span>
                 {isTyping ? "typing..." : "Online"}
               </p>
             </div>
-          </div>
+          </>
         )}
       </div>
 
-      {/* ── Messages ── */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-1">
+      {/* ── Messages area ── */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-0.5">
+
+        {/* Empty state */}
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center flex-1 gap-3 text-base-content/40 mt-20">
+          <div className="flex flex-col items-center justify-center flex-1 gap-4 py-20">
             <div className="avatar">
-              <div className="w-20 rounded-full ring-2 ring-base-content/10">
+              <div className="w-24 rounded-full ring-4 ring-primary/20 ring-offset-4 ring-offset-base-200">
                 <img
                   src={chatUser?.photoUrl || fallbackPhoto}
                   alt={chatUser?.firstName}
@@ -245,20 +247,23 @@ const Chat = () => {
                 />
               </div>
             </div>
-            <p className="font-semibold text-base-content/60">
-              {chatUser?.firstName} {chatUser?.lastName}
-            </p>
-            <p className="text-sm">You matched! Start the conversation 👋</p>
+            <div className="text-center">
+              <p className="font-bold text-lg">{chatUser?.firstName} {chatUser?.lastName}</p>
+              <p className="text-sm text-base-content/50 mt-1">You matched! Say hello 👋</p>
+            </div>
           </div>
         )}
 
         {messagesWithDates.map((item, i) => {
+          /* Date separator */
           if (item.type === "date") {
             return (
-              <div key={`date-${i}`} className="flex items-center gap-3 my-4">
-                <div className="flex-1 h-px bg-base-content/10"></div>
-                <span className="text-xs text-base-content/40 px-2">{item.label}</span>
-                <div className="flex-1 h-px bg-base-content/10"></div>
+              <div key={`date-${i}`} className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-base-content/10" />
+                <span className="text-xs text-base-content/40 bg-base-200 px-3 py-1 rounded-full border border-base-content/10">
+                  {item.label}
+                </span>
+                <div className="flex-1 h-px bg-base-content/10" />
               </div>
             );
           }
@@ -266,74 +271,83 @@ const Chat = () => {
           const msg = item;
           const isMe = msg.senderId === me?._id || msg.senderId?._id === me?._id;
           const nextItem = messagesWithDates[i + 1];
-          const isLast = !nextItem || nextItem.type === "date" || (
-            nextItem.type === "msg" && nextItem.senderId !== msg.senderId
-          );
+          const isLast =
+            !nextItem ||
+            nextItem.type === "date" ||
+            (nextItem.type === "msg" &&
+              (nextItem.senderId === me?._id) !== isMe);
 
           return (
             <div
               key={i}
-              className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"} ${isLast ? "mb-3" : "mb-0.5"}`}
+              className={`flex items-end gap-2 w-full ${isMe ? "flex-row-reverse" : "flex-row"} ${isLast ? "mb-3" : "mb-0.5"}`}
             >
-              <div className="w-7 shrink-0">
-                {isLast && (
+              {/* Avatar — only on last bubble in group */}
+              <div className="w-8 shrink-0 self-end">
+                {isLast ? (
                   <div className="avatar">
-                    <div className="w-7 rounded-full">
+                    <div className="w-8 h-8 rounded-full">
                       <img
                         src={isMe ? (me?.photoUrl || fallbackPhoto) : (chatUser?.photoUrl || fallbackPhoto)}
-                        alt="avatar"
+                        alt=""
                         onError={(e) => { e.target.src = fallbackPhoto; }}
                       />
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
 
-              <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-[70%]`}>
+              {/* Bubble */}
+              <div className={`flex flex-col gap-0.5 max-w-[65%] ${isMe ? "items-end" : "items-start"}`}>
                 <div
-                  className={`px-4 py-2 rounded-2xl text-sm leading-relaxed wrap-break-word
+                  className={`
+                    px-4 py-2.5 text-sm leading-relaxed wrap-break-word
                     ${isMe
-                      ? "bg-primary text-primary-content rounded-br-sm"
-                      : "bg-base-300 text-base-content rounded-bl-sm"
+                      ? "bg-primary text-primary-content rounded-t-2xl rounded-bl-2xl rounded-br-md"
+                      : "bg-base-100 text-base-content rounded-t-2xl rounded-br-2xl rounded-bl-md shadow-sm"
                     }
-                    ${msg._optimistic ? "opacity-70" : ""}
+                    ${msg._optimistic ? "opacity-60" : ""}
                   `}
                 >
                   {msg.text}
                 </div>
-                {isLast && msg.createdAt && (
-                  <span className="text-xs text-base-content/40 mt-1 px-1">
-                    {formatTime(msg.createdAt)}
+
+                {/* Timestamp + read receipt */}
+                {isLast && (
+                  <div className={`flex items-center gap-1 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                    <span className="text-[10px] text-base-content/40">
+                      {msg.createdAt ? formatTime(msg.createdAt) : ""}
+                    </span>
                     {isMe && (
-                      <span className={`ml-1 ${msg.seen ? "text-primary" : "text-base-content/40"}`}>
-                        ✓✓
+                      <span className={`text-[11px] ${msg.seen ? "text-primary" : "text-base-content/30"}`}>
+                        {msg.seen ? "✓✓" : "✓"}
                       </span>
                     )}
-                  </span>
+                  </div>
                 )}
               </div>
             </div>
           );
         })}
 
-        {/* Typing indicator bubble */}
+        {/* Typing indicator */}
         {isTyping && (
           <div className="flex items-end gap-2 flex-row mb-3">
-            <div className="w-7 shrink-0">
+            <div className="w-8 shrink-0">
               <div className="avatar">
-                <div className="w-7 rounded-full">
+                <div className="w-8 h-8 rounded-full">
                   <img
                     src={chatUser?.photoUrl || fallbackPhoto}
-                    alt="avatar"
+                    alt=""
                     onError={(e) => { e.target.src = fallbackPhoto; }}
                   />
                 </div>
               </div>
             </div>
-            <div className="px-4 py-2 rounded-2xl rounded-bl-sm bg-base-300 text-base-content text-sm flex gap-1 items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-base-content/50 animate-bounce [animation-delay:0ms]"></span>
-              <span className="w-1.5 h-1.5 rounded-full bg-base-content/50 animate-bounce [animation-delay:150ms]"></span>
-              <span className="w-1.5 h-1.5 rounded-full bg-base-content/50 animate-bounce [animation-delay:300ms]"></span>
+            <div className="bg-base-100 shadow-sm px-4 py-3 rounded-t-2xl rounded-br-2xl rounded-bl-md flex gap-1.5 items-center">
+              <span className="w-2 h-2 rounded-full bg-base-content/40 animate-bounce [animation-delay:0ms]" />
+              <span className="w-2 h-2 rounded-full bg-base-content/40 animate-bounce [animation-delay:150ms]" />
+              <span className="w-2 h-2 rounded-full bg-base-content/40 animate-bounce [animation-delay:300ms]" />
             </div>
           </div>
         )}
@@ -342,35 +356,37 @@ const Chat = () => {
       </div>
 
       {/* ── Input bar ── */}
-      <div className="shrink-0 bg-base-300 border-t border-base-content/10 px-4 py-3">
-        <form onSubmit={handleSend} className="flex items-center gap-3 bg-base-200 rounded-full px-4 py-2">
-          <input
-            ref={inputRef}
-            type="text"
-            className="flex-1 bg-transparent outline-none text-sm placeholder:text-base-content/40"
-            placeholder="Type a message..."
-            value={text}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            disabled={sending}
-            autoComplete="off"
-          />
+      <div className="shrink-0 px-3 py-3"
+        style={{ background: "var(--color-base-300)", borderTop: "1px solid oklch(var(--bc)/0.08)" }}>
+        <form onSubmit={handleSend} className="flex items-center gap-2">
+          <div className="flex-1 flex items-center bg-base-200 rounded-full px-4 py-2.5 gap-2">
+            <input
+              ref={inputRef}
+              type="text"
+              className="flex-1 bg-transparent outline-none text-sm placeholder:text-base-content/40"
+              placeholder="Type a message..."
+              value={text}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              disabled={sending}
+              autoComplete="off"
+            />
+          </div>
           <button
             type="submit"
             disabled={!text.trim() || sending}
-            className="btn btn-primary btn-circle btn-sm shrink-0"
+            className="btn btn-primary btn-circle shrink-0 w-11 h-11 min-h-0"
             title="Send"
           >
             {sending ? (
-              <span className="loading loading-spinner loading-xs"></span>
+              <span className="loading loading-spinner loading-xs" />
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 rotate-90" viewBox="0 0 24 24" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-90" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
               </svg>
             )}
           </button>
         </form>
-        <p className="text-xs text-center text-base-content/30 mt-1">Press Enter to send</p>
       </div>
     </div>
   );
