@@ -64,42 +64,66 @@ const Navbar = () => {
         {/* Right side */}
         <div className="flex-1 flex justify-end items-center gap-3">
           {user ? (
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle p-0 w-10 h-10 relative">
-                <img
-                  alt={`${user.firstName}'s avatar`}
-                  src={user.photoUrl || fallbackPhoto}
-                  onError={(e) => { e.target.src = fallbackPhoto; }}
-                  className="w-10 h-10 rounded-full ring-2 ring-primary/30 ring-offset-1 ring-offset-base-300 object-cover"
-                />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-300" />
-              </div>
-              <ul
-                tabIndex="-1"
-                className="menu menu-sm dropdown-content bg-base-100 rounded-2xl z-50 mt-3 w-56 p-2 shadow-xl border border-base-content/10"
-              >
-                <li className="px-3 py-2 mb-1">
-                  <div className="flex items-center gap-2 pointer-events-none">
-                    <img
-                      src={user.photoUrl || fallbackPhoto}
-                      onError={(e) => { e.target.src = fallbackPhoto; }}
-                      className="w-8 h-8 rounded-full object-cover"
-                      alt=""
-                    />
-                    <div>
-                      <p className="font-semibold text-sm leading-tight">{user.firstName} {user.lastName}</p>
-                      <p className="text-xs text-base-content/50 truncate max-w-[120px]">{user.emailId}</p>
+            <>
+              {/* Upgrade button — only for non-premium users */}
+              {!user.isPremium && (
+                <Link
+                  to="/premium"
+                  className="btn btn-sm rounded-xl border-0 gap-1.5 text-white font-semibold bg-linear-to-r from-amber-400 to-orange-500 shadow-sm shadow-orange-400/30 hover:-translate-y-0.5 hover:shadow-orange-400/50 transition-all"
+                >
+                  ⚡ Upgrade
+                </Link>
+              )}
+
+              <div className="dropdown dropdown-end">
+                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle p-0 w-10 h-10 relative">
+                  <img
+                    alt={`${user.firstName}'s avatar`}
+                    src={user.photoUrl || fallbackPhoto}
+                    onError={(e) => { e.target.src = fallbackPhoto; }}
+                    className="w-10 h-10 rounded-full ring-2 ring-primary/30 ring-offset-1 ring-offset-base-300 object-cover"
+                  />
+                  {user.isPremium ? (
+                    <span className="absolute -top-1 -right-1 text-sm leading-none">👑</span>
+                  ) : (
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-300" />
+                  )}
+                </div>
+                <ul
+                  tabIndex="-1"
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-2xl z-50 mt-3 w-56 p-2 shadow-xl border border-base-content/10"
+                >
+                  <li className="px-3 py-2 mb-1">
+                    <div className="flex items-center gap-2 pointer-events-none">
+                      <img
+                        src={user.photoUrl || fallbackPhoto}
+                        onError={(e) => { e.target.src = fallbackPhoto; }}
+                        className="w-8 h-8 rounded-full object-cover"
+                        alt=""
+                      />
+                      <div>
+                        <p className="font-semibold text-sm leading-tight">{user.firstName} {user.lastName}</p>
+                        {user.isPremium
+                          ? <p className="text-xs text-amber-500 font-medium">👑 Gold Member</p>
+                          : <p className="text-xs text-base-content/50 truncate max-w-30">{user.emailId}</p>
+                        }
+                      </div>
                     </div>
-                  </div>
-                </li>
-                <div className="divider my-0" />
-                <li><Link to="/profile" className="rounded-xl">👤 Profile</Link></li>
-                <li><Link to="/discover" className="rounded-xl">🔍 Discover</Link></li>
-                <li><Link to="/connections" className="rounded-xl">🤝 Connections</Link></li>
-                <div className="divider my-0" />
-                <li><a onClick={handleLogout} className="rounded-xl text-error hover:bg-error/10">🚪 Logout</a></li>
-              </ul>
-            </div>
+                  </li>
+                  <div className="divider my-0" />
+                  <li><Link to="/profile" className="rounded-xl">👤 Profile</Link></li>
+                  <li><Link to="/discover" className="rounded-xl">🔍 Discover</Link></li>
+                  <li><Link to="/connections" className="rounded-xl">🤝 Connections</Link></li>
+                  <li>
+                    <Link to="/premium" className="rounded-xl">
+                      {user.isPremium ? "👑 Gold Member" : "⚡ Go Premium"}
+                    </Link>
+                  </li>
+                  <div className="divider my-0" />
+                  <li><a onClick={handleLogout} className="rounded-xl text-error hover:bg-error/10">🚪 Logout</a></li>
+                </ul>
+              </div>
+            </>
           ) : (
             <div className="flex gap-2">
               <Link to="/login" className="btn btn-ghost btn-sm rounded-xl">Login</Link>
@@ -135,6 +159,11 @@ const Navbar = () => {
             </div>
             <ul tabIndex="-1" className="menu menu-sm dropdown-content bg-base-100 rounded-2xl z-50 mt-2 w-48 p-2 shadow-xl border border-base-content/10">
               <li><Link to="/profile" className="rounded-xl">👤 Profile</Link></li>
+              <li>
+                <Link to="/premium" className="rounded-xl">
+                  {user.isPremium ? "👑 Gold Member" : "⚡ Go Premium"}
+                </Link>
+              </li>
               <div className="divider my-0" />
               <li><a onClick={handleLogout} className="rounded-xl text-error hover:bg-error/10">🚪 Logout</a></li>
             </ul>
@@ -162,6 +191,10 @@ const Navbar = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive("/profile") ? 2.5 : 1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span className="text-[10px] font-medium">Profile</span>
+          </Link>
+          <Link to="/premium" className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all ${isActive("/premium") ? "text-amber-500" : "text-base-content/50"}`}>
+            <span className="text-xl leading-none">{user.isPremium ? "👑" : "⚡"}</span>
+            <span className="text-[10px] font-medium">{user.isPremium ? "Gold" : "Upgrade"}</span>
           </Link>
         </div>
       )}

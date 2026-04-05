@@ -14,6 +14,8 @@ import Home from "./Components/Home";
 import Chat from "./Components/Chat";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import NotFound from "./Components/NotFound";
+import Privacy from "./Components/Privacy";
+import Premium from "./Components/Premium";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -21,9 +23,17 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    let fetchedUser = null;
     axios
       .get(BASE_URL + "/api/profile/view", { withCredentials: true })
-      .then((res) => dispatch(addUser(res.data.user)))
+      .then((res) => {
+        fetchedUser = res.data.user;
+        dispatch(addUser(fetchedUser));
+        return axios.get(BASE_URL + "/api/payment/verify", { withCredentials: true });
+      })
+      .then((res) => {
+        dispatch(addUser({ ...fetchedUser, isPremium: res.data.isPremium }));
+      })
       .catch(() => {});
   }, []);
 
@@ -40,7 +50,9 @@ function App() {
             <Route path="/connections" element={<Connections />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/chat/:userId" element={<Chat />} />
+            <Route path="/premium" element={<Premium />} />
           </Route>
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
