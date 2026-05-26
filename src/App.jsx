@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { addUser } from "./utils/userSlice";
+import { setUnauthenticated } from "./utils/authSlice";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import Login from "./Components/Login";
@@ -21,21 +22,28 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function App() {
   const dispatch = useDispatch();
+  const location = useLocation();
 
   useEffect(() => {
-    let fetchedUser = null;
     axios
       .get(BASE_URL + "/api/profile/view", { withCredentials: true })
       .then((res) => {
-        fetchedUser = res.data.user;
+        const fetchedUser = res.data.user;
         dispatch(addUser(fetchedUser));
-        return axios.get(BASE_URL + "/api/payment/verify", { withCredentials: true });
+
+        axios
+          .get(BASE_URL + "/api/payment/verify", { withCredentials: true })
+          .then((pr) => dispatch(addUser({ ...fetchedUser, isPremium: pr.data.isPremium })))
+          .catch(() => {});
       })
-      .then((res) => {
-        dispatch(addUser({ ...fetchedUser, isPremium: res.data.isPremium }));
-      })
-      .catch(() => {});
-  }, []);
+      .catch(() => {
+        dispatch(setUnauthenticated());
+      });
+  }, [dispatch]);
+
+  const noFooterRoutes = ["/login", "/signup"];
+  const hideFooter = noFooterRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/chat");
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -56,7 +64,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   );
 }

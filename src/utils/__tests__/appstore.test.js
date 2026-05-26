@@ -1,31 +1,41 @@
 import store from '../appStore';
 import { addUser, removeUser } from '../userSlice';
 
-describe('testing the reduxStore',()=>{
+beforeAll(() => {
+  console.log('--- store tests started ---');
+});
 
-    test('before all',()=>{
-        console.log('connecting before all test cases')
-    })
+afterAll(() => {
+  console.log('--- store tests finished ---');
+});
 
-    test('after all',()=>{
-        console.log('....after all tests closed....')
-    })
+beforeEach(() => {
+  store.dispatch(removeUser());
+});
 
-    test('testing before connecting',()=>{
-        const state=store.getState()
-        expect(state.user).toBeNull()
-    })
+afterEach(() => {
+  console.log('current state after test:', store.getState());
+});
 
-    test('adding user through store',()=>{
-        const user={id:3,name:"kumar"}
-        const state=store.dispatch(addUser(user))
-        const presentState=store.getState().user
-        expect(presentState).toEqual(user)
-    })
+describe('testing the reduxStore', () => {
 
-    test('remove user',()=>{
-        store.dispatch(removeUser())
-        const state=store.getState().user
-        expect(state).toBeNull()
-    })
-})
+  test('should have null user state as initial state', () => {
+    const state = store.getState();
+    expect(state.user).toBeNull();
+  });
+
+  test('should update user state when addUser is dispatched', () => {
+    const user = { id: 3, name: 'kumar' };
+    store.dispatch(addUser(user));
+    const presentState = store.getState().user;
+    expect(presentState).toEqual(user);
+  });
+
+  test('should reset user to null when removeUser is dispatched', () => {
+    store.dispatch(addUser({ id: 3, name: 'kumar' }));
+    store.dispatch(removeUser());
+    const state = store.getState().user;
+    expect(state).toBeNull();
+  });
+
+});

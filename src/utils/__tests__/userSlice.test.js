@@ -10,9 +10,9 @@ test('addUser sets the user', () => {
   expect(newState).toEqual({ id: "2", name: "Mohan" });
 });
 
-test('addUser sets the user', () => {
+test('should return defined value when addUser is called', () => {
   const newState = userReducer(null, addUser({ id: "2", name: "Mohan" }));
- expect(newState).toBeDefined()
+  expect(newState).toBeDefined();
 });
 
 test('removeUser resets to null', () => {

@@ -1,99 +1,74 @@
-# devHive
+# devHive 🐝
 
-A developer networking platform — discover developers, send connection requests, and build your professional network.
+> **A developer-first networking platform** — discover other developers, connect, chat in real-time, and build your professional network.
 
-## Features
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Redux](https://img.shields.io/badge/Redux_Toolkit-2-764ABC?logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
 
-- **Discover** — Browse developer profiles one at a time, swipe or click to show interest or skip
-- **Connections** — View mutual connections and manage incoming requests (accept / reject)
-- **Profile** — View and edit your profile (name, age, gender, photo, about, skills)
-- **Auth** — Register and login with JWT cookie-based authentication
+---
 
-## Tech Stack
+## What is devHive?
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | React 19 + Vite |
-| Routing | React Router DOM v7 |
-| State | Redux Toolkit |
-| Styling | Tailwind CSS v4 + DaisyUI v5 |
-| HTTP | Axios |
+devHive is a social networking app built exclusively for developers. Think of it as a swipe-style discovery feed for dev networking — browse developer profiles, send connection requests, accept or reject incoming ones, and chat in real-time with your connections.
 
-## Getting Started
+Whether you're looking for a co-founder, an open-source collaborator, or just want to grow your dev network — devHive brings the right people to you.
 
-### Prerequisites
-- Node.js 18+
-- Backend API running at `http://localhost:3009`
+---
 
-### Installation
+## 🚀 Pages & Features
 
-```bash
-# Clone the repo
-git clone https://github.com/Mohan-1123/DevHive-web.git
-cd DevHive-web
+### 🏠 Home
+Public landing page introducing devHive with a hero section, feature highlights, and call-to-action buttons to sign up or log in.
 
-# Install dependencies
-npm install
+### 🔍 Discover
+A swipe-style card feed of developer profiles. Each card shows the developer's photo, name, age, bio, and skills. You can:
+- **Like** — send a connection request
+- **Skip** — pass on the profile
+- Cards animate out on action; the next profile loads automatically
 
-# Set up environment
-cp .env.example .env
-# Edit .env and set VITE_API_BASE_URL
+### 🤝 Connections
+Two-tab view:
+- **Requests** — incoming connection requests you can Accept or Reject
+- **Connections** — your accepted connections, each with a "Message" button to open chat
 
-# Start dev server
-npm run dev
-```
+### 💬 Chat
+Real-time 1-on-1 messaging powered by Socket.IO. Features:
+- Live message delivery (no refresh needed)
+- Typing indicators
+- Chat history loaded on open
+- Clean messenger-style UI with message bubbles
 
-App runs at `http://localhost:5173`
+### 👤 Profile
+Full profile editor with a live preview card on the side. Edit:
+- First & last name
+- Age and gender
+- Profile photo — drag-and-drop or tap to upload directly from your device (uploaded to Cloudinary with a real-time progress bar)
+- About / bio (280 char limit)
+- Skills (chip-style tag input, up to 20)
 
-## Environment Variables
+Profile completeness bar shows how filled-in your profile is.
 
-```env
-VITE_API_BASE_URL=http://localhost:3009
-```
+### 💎 Premium
+Subscription page to unlock premium features via Razorpay payment. Shows plan details and a one-click checkout flow.
 
-## API Reference
+### 🔐 Auth
+- **Signup** — multi-step flow: account details → profile info → optional photo upload
+- **Login** — email & password or **Google OAuth** (one-click sign in)
+- Sessions are cookie-based (JWT), persisted across page reloads
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/signup` | Register new user |
-| POST | `/api/auth/login` | Login, returns JWT cookie |
-| POST | `/api/auth/logout` | Clear JWT cookie |
-| GET | `/api/profile/view` | Get own profile |
-| PATCH | `/api/profile/edit` | Update profile |
-| GET | `/api/user/feed` | Paginated discover feed |
-| GET | `/api/user/connections` | Get all connections |
-| GET | `/api/user/requests/received` | Incoming connection requests |
-| POST | `/api/request/send/:status/:userId` | Send interest or ignore |
-| POST | `/api/request/review/:status/:requestId` | Accept or reject request |
+---
 
-## Project Structure
+## 🎨 Design
 
-```
-src/
-├── Components/
-│   ├── Login.jsx
-│   ├── Signup.jsx
-│   ├── Discover.jsx
-│   ├── Connections.jsx
-│   ├── Profile.jsx
-│   ├── Home.jsx
-│   ├── Navbar.jsx
-│   ├── Footer.jsx
-│   ├── ProtectedRoute.jsx
-│   ├── ErrorBoundary.jsx
-│   └── NotFound.jsx
-├── utils/
-│   ├── appStore.js
-│   └── userSlice.js
-├── App.jsx
-└── main.jsx
-```
+- **Dark theme** throughout using DaisyUI
+- **Glassmorphism** cards and navbars with soft gradients
+- **Mobile-first** — responsive on all screen sizes with a fixed bottom nav on mobile
+- Smooth animations on card actions, toasts, and page transitions
 
-## Scripts
+---
 
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run lint     # Run ESLint
-```
+## 📄 License
+
+MIT © devHive
