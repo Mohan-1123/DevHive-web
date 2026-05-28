@@ -73,7 +73,7 @@ const Navbar = () => {
     let cancelled = false;
     const fetchCount = () => {
       axios
-        .get(BASE_URL + "/api/user/requests/received", { withCredentials: true })
+        .get(BASE_URL + "/user/requests/received", { withCredentials: true })
         .then((res) => { if (!cancelled) setPendingCount((res.data.data || []).length); })
         .catch(() => {});
     };
@@ -87,7 +87,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(BASE_URL + "/api/auth/logout", {}, { withCredentials: true });
+      await axios.post(BASE_URL + "/auth/logout", {}, { withCredentials: true });
     } finally {
       dispatch(removeUser());
       navigate("/login");

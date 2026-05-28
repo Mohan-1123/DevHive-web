@@ -26,13 +26,13 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(BASE_URL + "/api/profile/view", { withCredentials: true })
+      .get(BASE_URL + "/profile/view", { withCredentials: true })
       .then((res) => {
         const fetchedUser = res.data.user;
         dispatch(addUser(fetchedUser));
 
         axios
-          .get(BASE_URL + "/api/payment/verify", { withCredentials: true })
+          .get(BASE_URL + "/payment/verify", { withCredentials: true })
           .then((pr) => dispatch(addUser({ ...fetchedUser, isPremium: pr.data.isPremium })))
           .catch(() => {});
       })

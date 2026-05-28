@@ -130,7 +130,7 @@ const Discover = () => {
   /* ── fetch ── */
   const fetchFeed = useCallback(async (pageNum) => {
     try {
-      const res   = await axios.get(BASE_URL + `/api/user/feed?page=${pageNum}&limit=10`, { withCredentials: true });
+      const res   = await axios.get(BASE_URL + `/user/feed?page=${pageNum}&limit=10`, { withCredentials: true });
       const users = res.data.data?.users || [];
       if (users.length === 0) {
         setNoMore(true);
@@ -179,7 +179,7 @@ const Discover = () => {
     await new Promise(r => setTimeout(r, 260));
 
     try {
-      await axios.post(BASE_URL + `/api/request/send/${status}/${userId}`, {}, { withCredentials: true });
+      await axios.post(BASE_URL + `/request/send/${status}/${userId}`, {}, { withCredentials: true });
       const remaining = feed.slice(1);
       setFeed(remaining);
       if (remaining.length === 0 && !noMore) {

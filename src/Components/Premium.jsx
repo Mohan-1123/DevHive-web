@@ -100,7 +100,7 @@ const Premium = () => {
       return;
     }
     try {
-      const res = await axios.post(BASE_URL + "/api/payment/order", {}, { withCredentials: true });
+      const res = await axios.post(BASE_URL + "/payment/order", {}, { withCredentials: true });
       const { orderId, amount, currency, key_id } = res.data;
 
       const options = {
@@ -110,7 +110,7 @@ const Premium = () => {
         order_id: orderId,
         handler: async () => {
           try {
-            const v = await axios.get(BASE_URL + "/api/payment/verify", { withCredentials: true });
+            const v = await axios.get(BASE_URL + "/payment/verify", { withCredentials: true });
             dispatch(addUser({ ...user, isPremium: v.data.isPremium }));
             setSuccess(true);
             setTimeout(() => navigate("/discover"), 2200);

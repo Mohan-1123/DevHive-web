@@ -260,7 +260,7 @@ const Login = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        BASE_URL + "/api/auth/login",
+        BASE_URL + "/auth/login",
         { emailId: email.trim().toLowerCase(), PassWord: password },
         { withCredentials: true }
       );

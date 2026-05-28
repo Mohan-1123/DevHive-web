@@ -448,7 +448,7 @@ const Signup = () => {
       }
 
       const res = await axios.post(
-        BASE_URL + "/api/auth/signup",
+        BASE_URL + "/auth/signup",
         {
           firstName:  firstName.trim(),
           lastName:   lastName.trim(),

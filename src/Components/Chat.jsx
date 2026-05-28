@@ -55,8 +55,8 @@ const Chat = () => {
     setError("");
     try {
       const [userRes, chatRes] = await Promise.all([
-        axios.get(BASE_URL + `/api/profile/view/${userId}`, { withCredentials: true }),
-        axios.get(BASE_URL + `/api/chat/${userId}`,         { withCredentials: true }),
+        axios.get(BASE_URL + `/profile/view/${userId}`, { withCredentials: true }),
+        axios.get(BASE_URL + `/chat/${userId}`,         { withCredentials: true }),
       ]);
       if (!isMountedRef.current) return;
       setChatUser(userRes.data.user || userRes.data);
@@ -66,7 +66,7 @@ const Chat = () => {
       if (!isMountedRef.current) return;
       // Try at least loading the user profile
       try {
-        const userRes = await axios.get(BASE_URL + `/api/profile/view/${userId}`, { withCredentials: true });
+        const userRes = await axios.get(BASE_URL + `/profile/view/${userId}`, { withCredentials: true });
         if (!isMountedRef.current) return;
         setChatUser(userRes.data.user || userRes.data);
         setMessages([]);

@@ -401,7 +401,7 @@ const Profile = () => {
       }
 
       const res = await axios.patch(
-        BASE_URL + "/api/profile/edit",
+        BASE_URL + "/profile/edit",
         { firstName: firstName.trim(), lastName: lastName.trim(), age: age ? Number(age) : undefined, gender, photo: finalPhotoUrl || undefined, about, skills },
         { withCredentials: true }
       );

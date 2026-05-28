@@ -30,7 +30,7 @@ const GoogleAuthButton = () => {
       setLoading(true);
       try {
         const response = await axios.post(
-          BASE_URL + '/api/auth/google',
+          BASE_URL + '/auth/google',
           { code: tokenResponse.code },
           { withCredentials: true }
         );

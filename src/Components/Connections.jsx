@@ -385,7 +385,7 @@ const Connections = () => {
     if (activeTab === "connections" && !fetched.connections && !loading.connections) {
       setLoading((l) => ({ ...l, connections: true }));
       axios
-        .get(BASE_URL + "/api/user/connections", { withCredentials: true })
+        .get(BASE_URL + "/user/connections", { withCredentials: true })
         .then((res) => setConnections(res.data.data || []))
         .catch((err) => setError((e) => ({ ...e, connections: err.response?.data?.message || "Failed to load connections." })))
         .finally(() => {
@@ -396,7 +396,7 @@ const Connections = () => {
     if (activeTab === "pending" && !fetched.requests && !loading.requests) {
       setLoading((l) => ({ ...l, requests: true }));
       axios
-        .get(BASE_URL + "/api/user/requests/received", { withCredentials: true })
+        .get(BASE_URL + "/user/requests/received", { withCredentials: true })
         .then((res) => setRequests(res.data.data || []))
         .catch((err) => setError((e) => ({ ...e, requests: err.response?.data?.message || "Failed to load requests." })))
         .finally(() => {
@@ -422,7 +422,7 @@ const Connections = () => {
       pending.forEach(({ status, timeoutId, request }) => {
         clearTimeout(timeoutId);
         axios
-          .post(BASE_URL + `/api/request/review/${status}/${request._id}`, {}, { withCredentials: true })
+          .post(BASE_URL + `/request/review/${status}/${request._id}`, {}, { withCredentials: true })
           .then(() => window.dispatchEvent(new Event("requests:changed")))
           .catch(() => {});
       });
@@ -451,7 +451,7 @@ const Connections = () => {
     const timeoutId = setTimeout(async () => {
       try {
         await axios.post(
-          BASE_URL + `/api/request/review/${status}/${request._id}`,
+          BASE_URL + `/request/review/${status}/${request._id}`,
           {},
           { withCredentials: true }
         );
